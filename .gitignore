@@ -4,8 +4,7 @@ data/raw/
 *.xlsx
 *.zip
 
-# Power BI working files (commit screenshots + notes, not the .pbix unless small)
-*.pbix
+# Power BI: the dashboard .pbix IS committed (powerbi/medicare-star-ratings-dashboard.pbix)
 
 # OS / editor junk
 .DS_Store

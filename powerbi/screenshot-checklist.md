@@ -1,55 +1,50 @@
 # Screenshot Checklist — dashboard exports for the repo
 
-The `.pbix` stays on your machine (large binary, never committed). The repo shows
-the work through screenshots in `powerbi/screenshots/`. Export AFTER the cross-page
-checklist in `layout-spec.md` is green.
+The `.pbix` is committed at `powerbi/medicare-star-ratings-dashboard.pbix`. The screenshots in
+`powerbi/screenshots/` and SQL result screenshots in `queries/results/` let people see the work
+without opening Power BI.
+Export AFTER the cross-page checklist in `layout-spec.md` is green.
 
 ## How to capture
 
-Power BI Desktop has no one-click "page as PNG", so:
-
-1. **Full pages:** **File → Export → Export to PDF** → save, then screenshot each
-   page — OR simpler: maximize Power BI Desktop, select the page tab, and use
-   **Win + Shift + S** (Snipping Tool) → drag across the full canvas → save.
-2. **Spotlight visuals:** click the visual so it's selected (grey border), then
-   Win + Shift + S around just that visual — crisper than cropping later.
-3. Check each shot: no "(Blank)" categories, titles visible, no cut-off edges.
+1. Maximize Power BI Desktop and collapse the Filters, Visualizations and Data panes
+   so the canvas fills the window.
+2. Select the page tab, move the mouse off the canvas (no hover tooltips), then
+   **Win + Shift + S** → drag across the full canvas → save as PNG.
+3. Check each shot: no "(Blank)" categories, titles visible, no cut-off edges,
+   no visual left selected or cross-highlighted.
 
 ## Exactly what to export
 
-| # | File name | What | Why |
+| # | File name | Tab name in the .pbix | What it shows |
 |---|---|---|---|
-| 1 | `page-1-rating-overview.png` | Full Page 1 | Distribution + leaderboard = the headline |
-| 2 | `page-2-yoy-movers.png` | Full Page 2 | The improvement story (Kaiser, Alignment, Centene) |
-| 3 | `page-3-at-risk-watch.png` | Full Page 3 | The watch list = the analyst's value-add |
-| 4 | `spotlight-org-leaderboard.png` | Page 1, visual 1.3 only | Close-up for the README — orgs + YoY bars |
-| 5 | `spotlight-movers-table.png` | Page 2, visual 2.2 only | Close-up for the README — top improvers |
+| 1 | `01_rating_distribution.png` | Rating Distribution | KPI cards, star-band distribution, star-colored org leaderboard |
+| 2 | `02_yoy_movers.png` | Year-over-Year Movers | Green gainers / red drops, all-movers table, Key Findings callout |
+| 3 | `03_at_risk_monitoring.png` | At-Risk Monitoring | Risk KPI cards, risk-status donut, conditionally formatted watch list |
 
 ## Naming rules
 
-- Lowercase, hyphens, exactly as above — the README links to these paths.
-- PNG only. If a file exceeds ~1 MB, re-snip tighter (visual-only) instead of compressing.
-- Never commit a screenshot with real-looking but wrong numbers: if drill 6's
-  re-run changes Kaiser's value, re-snip Page 2 before committing.
+- Exactly as above — two-digit page number, underscore, lowercase. The README links to these paths.
+- PNG only. If a file exceeds ~1 MB, re-snip tighter instead of compressing.
+- Never commit a screenshot whose numbers disagree with SSMS. The Key Findings callout
+  on page 2 must read Kaiser +0.50, Alignment +0.40, Centene +0.26.
 
 ## Where they go
 
 ```
 powerbi/
   screenshots/
-    page-1-rating-overview.png
-    page-2-yoy-movers.png
-    page-3-at-risk-watch.png
-    spotlight-org-leaderboard.png
-    spotlight-movers-table.png
+    01_rating_distribution.png
+    02_yoy_movers.png
+    03_at_risk_monitoring.png
+queries/
+  results/
+    A1_… through D1_….png   # one per query, see queries/README.md
 ```
-
-Send them via Drive (like the ZIPs) or drop them straight into that folder —
-either way, they get committed and the README gallery goes live.
 
 ## Done-when
 
-- [ ] All 5 files exist in `powerbi/screenshots/` with the exact names above
-- [ ] Each opens cleanly — titles readable, no blank categories, numbers match SSMS
-- [ ] Page 2 shots reflect the final (re-run) Kaiser number
-- [ ] Committed + pushed — README gallery updated
+- [x] All 3 dashboard files exist in `powerbi/screenshots/` with the exact names above
+- [x] All 13 SQL result screenshots exist in `queries/results/`
+- [x] Numbers match SSMS (521 rated, 3.65 avg, 40.9% at 4+, Kaiser 4.29)
+- [ ] Committed + pushed — README gallery live

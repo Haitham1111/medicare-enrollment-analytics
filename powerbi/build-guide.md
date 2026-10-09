@@ -181,9 +181,8 @@ General habits while building:
 
 ## Step 8 — Save and screenshot (10 min)
 
-1. **File → Save** → save as `medicare-star-ratings-dashboard.pbix` on your machine
-   (Documents or wherever you keep it). **Do NOT put the .pbix in the repo** —
-   it's a large binary; the repo gets screenshots only.
+1. **File → Save** → save as `powerbi/medicare-star-ratings-dashboard.pbix` in the repo.
+   It's small (~340 KB) and committed so reviewers can open the model and DAX themselves.
 2. Follow `screenshot-checklist.md` — export the 3 pages + 2 spotlight visuals,
    save to `powerbi/screenshots/`, then send them my way (Drive, like the ZIPs)
    or drop them straight into the repo folder.

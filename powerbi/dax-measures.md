@@ -102,11 +102,19 @@ COUNTROWS (
     )
 )
 ```
-*What it answers:* how many contracts fell under the 4-star line this year — the headline KPI for Page 3. (Needs the `At-Risk Flag` calculated column below.)
+*What it answers:* how many contracts fell under the 4-star line this year.
+
+> **Not used on the dashboard.** The final `At-Risk Flag` (below) has no "Dropped below 4"
+> value, so this measure returns blank. The 4-star-line question is answered in SQL instead:
+> `queries/reconciliation-242.sql` → 56 contracts. Page 3's KPI cards count contracts by
+> flag (Steep Drop, Sub-3 Star Risk) plus `Unrated Contracts`.
 
 ---
 
 ## Calculated columns
+
+> These are the definitions **as they exist in the .pbix** (verified Oct 9 against the
+> live model), not the original draft.
 
 ### Star Band (table: `FactRatings` → Table tools → New column)
 ```dax
@@ -114,58 +122,58 @@ Star Band =
 SWITCH (
     TRUE (),
     ISBLANK ( FactRatings[OverallRating] ), "Unrated",
-    FactRatings[OverallRating] >= 4.5, "4.5 - 5.0",
-    FactRatings[OverallRating] >= 4, "4.0 - 4.4",
-    FactRatings[OverallRating] >= 3.5, "3.5 - 3.9",
-    FactRatings[OverallRating] >= 3, "3.0 - 3.4",
-    "Below 3.0"
+    FactRatings[OverallRating] >= 4.5, "4.5 - 5.0 Stars",
+    FactRatings[OverallRating] >= 3.5, "3.5 - 4.0 Stars",
+    FactRatings[OverallRating] >= 3.0, "3.0 Stars",
+    "Below 3.0 Stars"
 )
 ```
-*What it answers:* buckets every contract-year into a rating band for the Page 1 distribution chart. After creating it, sort it properly: create a second column `Star Band Sort` below, select `Star Band` → **Column tools → Sort by column → Star Band Sort**.
+*What it answers:* buckets every contract-year into a rating band for the Page 1 distribution chart.
 
+### Star Band Sort (table: `FactRatings` → Table tools → New column)
 ```dax
 Star Band Sort =
 SWITCH (
     TRUE (),
-    ISBLANK ( FactRatings[OverallRating] ), 6,
-    FactRatings[OverallRating] >= 4.5, 1,
-    FactRatings[OverallRating] >= 4, 2,
+    ISBLANK ( FactRatings[OverallRating] ), 5,
+    FactRatings[OverallRating] >= 4.5, 4,
     FactRatings[OverallRating] >= 3.5, 3,
-    FactRatings[OverallRating] >= 3, 4,
-    5
+    FactRatings[OverallRating] >= 3.0, 2,
+    1
 )
 ```
+*Why it exists:* without it Power BI sorts the band labels alphabetically, which puts
+"Below 3.0 Stars" last. Select `Star Band` → **Column tools → Sort by column → Star Band Sort**
+so the chart reads low → high: Below 3.0 · 3.0 · 3.5–4.0 · 4.5–5.0.
 
 ### At-Risk Flag (table: `DimContract` → Table tools → New column)
 ```dax
 At-Risk Flag =
-VAR R25 =
-    LOOKUPVALUE (
-        FactRatings[OverallRating],
-        FactRatings[ContractID], DimContract[ContractID],
-        FactRatings[Year], 2025
-    )
-VAR R24 =
-    LOOKUPVALUE (
-        FactRatings[OverallRating],
-        FactRatings[ContractID], DimContract[ContractID],
-        FactRatings[Year], 2024
-    )
+VAR Rating2024 =
+    CALCULATE ( MAX ( FactRatings[OverallRating] ), FactRatings[Year] = 2024 )
+VAR Rating2025 =
+    CALCULATE ( MAX ( FactRatings[OverallRating] ), FactRatings[Year] = 2025 )
 RETURN
     SWITCH (
         TRUE (),
-        ISBLANK ( R25 ), "Unrated in 2025",
-        ISBLANK ( R24 ), "New in 2025",
-        R24 >= 4 && R25 < 4, "Dropped below 4",
-        R25 >= 3.5 && R25 < 4, "Near cutoff (3.5-3.9)",
-        R25 < 3.5, "Below 3.5",
-        "Stable 4+"
+        ISBLANK ( Rating2025 ), "Unrated in 2025",
+        Rating2025 < 3.0, "Sub-3 Star Risk",
+        NOT ISBLANK ( Rating2024 ) && ( Rating2025 - Rating2024 ) <= -1.0, "Steep Drop (>=1 Star)",
+        "Stable / Performing"
     )
 ```
-*What it answers:* one plain-English status per contract — the entire logic of Page 3 in a single column. `LOOKUPVALUE` pulls each contract's 2024 and 2025 ratings side by side; `SWITCH(TRUE(), …)` checks the conditions top-down, first match wins.
+*What it answers:* one status per contract — the logic behind Page 3. `SWITCH(TRUE(), …)`
+checks top-down, first match wins. Current counts: 471 Stable / Performing,
+369 Unrated in 2025, 28 Steep Drop, 22 Sub-3 Star Risk (890 total).
 
-> Cross-check: the **"Unrated in 2025"** slice should reconcile with your SQL re-drill
-> (the 242-contract NULL-aware status query — category counts must total 242).
+> **Why the `ISBLANK` checks matter:** in DAX, `BLANK() < 3.0` is **TRUE**. The first
+> version of this column skipped the blank check, so all 369 unrated contracts were
+> labeled "Sub-3 Star Risk" (the card read 391 instead of 22). Same trap on the drop
+> test: `BLANK() - Rating2024` is negative. SQL drill C4 excludes NULLs explicitly,
+> which is how the mismatch was caught.
+
+> Cross-check: `queries/reconciliation-242.sql` — the 242 contracts at 4+ stars in 2024
+> split into 173 still 4+, 56 dropped below 4, 9 not in the 2025 file, 4 unrated.
 > If Power BI and SSMS disagree, SSMS wins until you find why.
 
 ---
@@ -179,6 +187,6 @@ RETURN
 | 1 | Org leaderboard table | `ParentOrg`, `Avg Star Rating`, `Rated Contracts`, `% Contracts 4+ Stars`, `Rating YoY Change` |
 | 2 | Movers table | `ContractName`, `ParentOrg`, 2024/2025 ratings, `Contract YoY Change` |
 | 2 | Top-10 improvers/decliners bars | `ContractName` (axis), `Contract YoY Change` (values) + Top-N filter |
-| 3 | KPI | `Dropped Below 4 Count`, `Unrated Contracts` |
+| 3 | KPI cards | Count of `DimContract[ContractID]` filtered to each `At-Risk Flag` value, `Unrated Contracts` |
 | 3 | Flag breakdown | `At-Risk Flag` (axis/legend) |
 | 3 | Watch-list table | `ContractName`, `ParentOrg`, `At-Risk Flag`, 2024/2025 ratings |

@@ -1,57 +1,47 @@
-# Power BI Dashboard — Build Notes
+# Power BI Dashboard — Medicare Star Ratings
 
-> **Build pack (Oct 2026):** the paint-by-numbers kit lives here —
-> `build-guide.md` (start here), `dax-measures.md`, `layout-spec.md`,
-> `screenshot-checklist.md`. The `.pbix` is built on the Windows machine and
-> never committed; `screenshots/` holds the repo gallery.
+`medicare-star-ratings-dashboard.pbix` is in this folder — download it and open it in Power BI
+Desktop to inspect the data model and DAX. This folder also holds everything needed to rebuild
+it from scratch and the screenshots that show it.
+
+| File | What it is |
+|---|---|
+| `medicare-star-ratings-dashboard.pbix` | The dashboard itself (data model, DAX, 3 pages) |
+| `build-guide.md` | Step-by-step build, start here |
+| `dax-measures.md` | Every measure and calculated column, as they exist in the model |
+| `layout-spec.md` | Page-by-page visual spec |
+| `screenshot-checklist.md` | How and what to capture |
+| `medicare-theme-dark.json` | Custom report theme (the one in use) |
+| `medicare-theme-light.json` | Light variant of the same theme |
+| `screenshots/` | `01_rating_distribution.png`, `02_yoy_movers.png`, `03_at_risk_monitoring.png` |
 
 ## Pages
 
-1. **Overview** — KPI cards: total MA enrollment (latest year), MA penetration %,
-   YoY growth %. Line chart: MA vs. Original Medicare enrollment over time.
-2. **Plan Mix** — Donut: enrollment share by plan type (HMO/PPO/PFFS).
-   Stacked bar: plan-type mix by year.
-3. **Geography** — Filled map: MA penetration by state. Bar chart: top 10 counties.
-   Slicer: year.
-4. **Premiums & Ratings** — Line: weighted avg premium by plan type over time.
-   Bar: enrollment share by star rating. Scatter: premium vs. enrollment growth
-   by contract (ties to `sql/10_premium_rating_vs_growth.sql`).
-5. **Market** — Bar: top 10 parent organizations by enrollment. Line: D-SNP/C-SNP/I-SNP
-   enrollment growth.
+1. **Rating Distribution** — KPI cards (avg star rating, rated contracts, % at 4+
+   stars), Year tiles (2024 / 2025), contracts by star band, and an organization
+   leaderboard bar chart colored by star-rating rules (green ≥ 4.5 → red < 3.0).
+2. **Year-over-Year Movers** — Top 10 gainers (green) and steepest 10 drops (red) at
+   contract level, the full movers table, and a Key Findings callout
+   (Kaiser +0.50, Alignment Healthcare +0.40, Centene +0.26).
+3. **At-Risk Monitoring** — KPI cards for steep drops, sub-3-star contracts and unrated
+   contracts; a risk-status donut; and a watch list with conditional formatting
+   (soft red for ratings below 3.0, red / orange flag text).
 
-## Data Model
+## Data model
 
-- Fact: enrollment (one row per contract × year, or county × year)
-- Dimensions: date/year, geography (state/county), plan (contract, plan type,
-  parent org), ratings
-- Relationships: single-direction, star schema. Hide key columns used only for joins.
+- `FactRatings` — one row per contract per year (2024 and 2025 summary files appended).
+  `OverallRating` is numeric; CMS text values ("Plan too new to be measured", etc.) are blank.
+- `DimContract` — one row per contract (890), with `ContractName`, `ParentOrg` and the
+  calculated `At-Risk Flag`.
+- Relationship: `DimContract[ContractID]` 1 → * `FactRatings[ContractID]`, single direction.
+- `_Measures` — measure table; see `dax-measures.md`.
 
-## DAX Measures to Write
+The SQL side mirrors this exactly: `queries/00_setup_views.sql` builds `FactRatings` and
+`DimContract` views over the same raw tables, so SSMS and the dashboard can be
+reconciled number for number.
 
-```dax
-Total Enrollment = SUM ( Enrollment[enrollment] )
+## Theme
 
-MA Penetration % =
-DIVIDE (
-    CALCULATE ( [Total Enrollment], Enrollment[program] = "MA" ),
-    [Total Enrollment]
-)
-
-YoY Growth % =
-VAR CurrentYear = [Total Enrollment]
-VAR PriorYear =
-    CALCULATE ( [Total Enrollment], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
-RETURN
-    DIVIDE ( CurrentYear - PriorYear, PriorYear )
-
-Weighted Avg Premium =
-DIVIDE (
-    SUMX ( Premiums, Premiums[monthly_premium] * Premiums[enrollment] ),
-    SUM ( Premiums[enrollment] )
-)
-```
-
-## Screenshots
-
-Export each dashboard page as PNG and drop it here (`page-1-overview.png`, …)
-so the repo shows the work without requiring the .pbix to open.
+Import with **View → Themes → Browse for themes → `medicare-theme-dark.json`**.
+Page background `#0F172A`, card surfaces `#1E293B`, text `#F8FAFC`, and an outer
+bottom-right shadow on every visual.

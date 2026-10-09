@@ -56,14 +56,15 @@ leaderboard shows the same top orgs your drills found.
 **The sentence this page must land:** *"Kaiser, Alignment, and Centene improved the
 most — and here are the contracts sliding backwards."*
 
-> **[verify]:** Kaiser's 2025 average is still open (screenshot said 4.29, an early
-> typed value said 4.75 — screenshot wins; drill 6 needs its re-run). If the re-run
-> changes the number, update the callout below before screenshotting.
+> **Verified Oct 9:** Kaiser's 2025 average is **4.29** (2024: 3.79). Confirmed by
+> drill A3 in SSMS and by the Power BI model — the early 4.75 value was a typo.
+> Centene is **+0.26** (2.933 → 3.197); rounding both averages first gives a misleading
+> 0.27, so always subtract the unrounded values.
 
 ### Visual 2.1 — Callout cards (top row)
 - **Visual:** Three Card visuals, or one Text box with the three numbers.
 - **Content (your verified findings):**
-  - "Kaiser — **+0.50** YoY (highest improvement) [verify: pending drill-6 re-run]"
+  - "Kaiser — **+0.50** YoY (highest improvement, 2025 avg 4.29)"
   - "Alignment Healthcare — **+0.40** YoY"
   - "Centene — **+0.26** YoY (still lowest avg, 3.20 — but trending up)"
 - These are hand-typed from your SQL results — that's fine, they're your verified numbers.
@@ -139,6 +140,6 @@ from losing stars — this is the watch list."*
 - [ ] Same Year slicer default (2025) behaves identically on pages 1–2
 - [ ] No visual shows "(Blank)" as a category — blanks mean a cleaning step was missed
 - [ ] All three KPI numbers on Page 1 match SSMS spot-checks
-- [ ] Kaiser callout on Page 2 matches the re-run drill-6 number [verify]
+- [x] Kaiser callout on Page 2 matches SSMS drill A3 (4.29, +0.50)
 - [ ] Page 3 watch-list counts reconcile with the 242-contract SQL re-drill
 - [ ] Every visual has a title; no default "Sum of…" field names visible

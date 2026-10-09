@@ -1,62 +1,98 @@
-# Medicare Enrollment Analytics
+# Medicare Advantage Star Ratings Analytics
 
-A healthcare data analytics capstone analyzing **Medicare Advantage (Part D / MA-PD) enrollment trends** using CMS public datasets — combining domain expertise from Medicare insurance sales and medical billing with SQL and Power BI.
+A healthcare analytics project tracking **CMS Medicare Advantage / Part D star ratings
+from 2024 to 2025** — which contracts and parent organizations improved, which fell
+below the 4-star bonus line, and which ones disappeared from the ratings entirely.
+Built in **SQL Server** and **Power BI** by a licensed Medicare agent who sells these
+plans and wanted to see the numbers behind them.
 
-## Business Questions
+![Rating distribution](powerbi/screenshots/01_rating_distribution.png)
 
-1. How has Medicare Advantage enrollment grown relative to Original Medicare over time?
-2. Which plan types (HMO, PPO, PFFS) dominate enrollment, and is the mix shifting?
-3. Standalone PDP vs. MA-PD: where is Part D enrollment actually going?
-4. Which states and counties have the highest MA penetration?
-5. How have average monthly premiums trended by plan type?
-6. Do higher star-rated plans gain enrollment share over time?
-7. Which parent organizations hold the most enrollment (market concentration)?
-8. How fast are Special Needs Plans (D-SNP, C-SNP, I-SNP) growing?
-9. What do disenrollment and plan-switching patterns look like year over year?
-10. Is there a relationship between premiums, star ratings, and enrollment growth?
+## Headline findings
 
-## Dataset
+- **The 4-star bonus line is getting harder to hold.** 44.4% of rated contracts were
+  at 4+ stars in 2024; in 2025 it's **40.9%** (213 of 521). Average rating slipped
+  from 3.68 to **3.65**.
+- **Of the 242 contracts at 4+ stars in 2024, 56 (23%) fell below 4** in 2025 —
+  a bonus-payment loss for each. 173 held on, 9 left the ratings file, 4 went unrated.
+- **Kaiser (+0.50), Alignment Healthcare (+0.40) and Centene (+0.26)** are the top
+  three improvers among parent orgs with 5+ rated contracts. Kaiser now averages 4.29.
+  The two biggest carriers went the other way: UnitedHealth −0.18, Humana −0.28.
+- **33 contracts dropped a full star or more**; Humana (6) and UnitedHealth (5)
+  account for a third of them.
+- **Rating coverage is a story of its own:** only 521 of 789 contracts in the 2025
+  file have a score. Devoted Health has 54.5% of its contracts unrated.
 
-CMS public use files — **Medicare Advantage / Part D Contract and Enrollment Data**
-(see [`data/README.md`](data/README.md) for download links and file descriptions).
+Full write-up with the query behind every number: [`docs/findings.md`](docs/findings.md).
 
-Raw data files are **not committed** to this repo (see `.gitignore`).
+## Dashboard
 
-## Project Structure
+Three pages, dark theme, star-rating color rules (green ≥ 4.5 → red < 3.0).
+
+| Page | What it answers |
+|---|---|
+| ![](powerbi/screenshots/01_rating_distribution.png) **Rating Distribution** | Where do contracts land, and which organizations lead? |
+| ![](powerbi/screenshots/02_yoy_movers.png) **Year-over-Year Movers** | Who gained and who lost the most, 2024 → 2025? |
+| ![](powerbi/screenshots/03_at_risk_monitoring.png) **At-Risk Monitoring** | Which contracts need attention — steep drops and sub-3-star plans? |
+
+## SQL
+
+Twelve drills on the `CMS_Stars` database (JOINs, anti-joins, GROUP BY / HAVING,
+CTEs, window functions) plus a NULL-aware reconciliation query. Every query was run
+against the real CMS data — result screenshots are in
+[`queries/results/`](queries/results/).
+
+| Block | Drills | Technique |
+|---|---|---|
+| A — Joins | A1 inner join, A2 anti-join, A3 org rollup, A4 new entrants | `INNER JOIN`, `NOT EXISTS` |
+| B — Aggregation | B1–B4 distributions, top orgs, band migration | `GROUP BY`, `HAVING`, `SUM() OVER ()` |
+| C — CTEs | C1 ranked contracts, C2 unrated by org, C3 drop detection, C4 at-risk flag | `WITH`, `ROW_NUMBER() OVER (PARTITION BY …)`, `CASE` |
+| D — Reconciliation | 242-contract status check | `LEFT JOIN` + explicit NULL handling |
+
+## Project structure
 
 ```
-├── sql/            # Analysis queries (numbered, one business question each)
-├── powerbi/        # Dashboard build notes, DAX measures, screenshots
-├── data/           # Download instructions only — no raw data committed
-└── docs/           # Findings write-up
+├── queries/
+│   ├── 00_setup_views.sql        # FactRatings / DimContract views over the raw CMS imports
+│   ├── drill-set-1.sql           # the 12 drills
+│   ├── reconciliation-242.sql    # NULL-aware status of every 2024 4+ star contract
+│   └── results/                  # SSMS screenshots of each query's output
+├── powerbi/
+│   ├── medicare-star-ratings-dashboard.pbix  # the dashboard — data model + DAX
+│   ├── medicare-theme-dark.json  # custom report theme (light variant alongside)
+│   ├── dax-measures.md           # every measure and calculated column
+│   ├── layout-spec.md            # page-by-page visual spec
+│   └── screenshots/              # dashboard pages
+├── docs/findings.md              # the write-up
+├── data/README.md                # where to download the CMS files
+└── sql/templates/                # next phase: enrollment-trend query templates
 ```
 
-## Techniques Used
+## How to run
 
-- Joins across enrollment, plan characteristics, and ratings files
-- CTEs for readable multi-step analysis
-- Window functions (`LAG` for YoY growth, `SUM() OVER` for market share, `RANK` for plan rankings)
-- Aggregations and pivots for state/county and plan-type breakdowns
+1. Download the 2024 and 2025 **Part C and D Star Ratings** data from CMS
+   (see [`data/README.md`](data/README.md)) and import the summary and domain sheets
+   into a SQL Server database named `CMS_Stars` as `summary_2024`, `summary_2025`,
+   `domain_2025`.
+2. Run `queries/00_setup_views.sql` once — it builds the `FactRatings` / `DimContract`
+   views the drills and the dashboard both use.
+3. Run `queries/drill-set-1.sql` and `queries/reconciliation-242.sql`.
+4. Open `powerbi/medicare-star-ratings-dashboard.pbix` in Power BI Desktop to inspect the
+   model and DAX. To rebuild from scratch, follow `powerbi/dax-measures.md` and
+   `powerbi/layout-spec.md`, then import `powerbi/medicare-theme-dark.json` via
+   **View → Themes → Browse for themes**.
 
-## Key Findings
+## Data notes
 
-> TODO — fill in as analysis completes. Aim for 4–6 bullet findings a hiring
-> manager can skim in 30 seconds, e.g.:
-> - MA penetration reached X% nationally in 2025, up from Y% in 2020
-> - D-SNP enrollment grew Z% YoY, the fastest-growing segment
+- CMS publishes text instead of a score for some contracts ("Plan too new to be
+  measured", "Not enough data available", "Not Applicable"). These are treated as
+  **NULL / unrated**, never as zero, and are counted separately.
+- Parent-org averages are simple averages across that org's rated contracts —
+  not enrollment-weighted.
 
-See [`docs/findings.md`](docs/findings.md) for the full write-up.
+## Tech stack
 
-## How to Run
-
-1. Download the CMS files per `data/README.md` into a local `data/raw/` folder (git-ignored).
-2. Load into your SQL engine of choice (SQL Server / Postgres / BigQuery).
-3. Run queries in `sql/` in numbered order.
-4. Open the Power BI notes in `powerbi/` to rebuild the dashboard.
-
-## Tech Stack
-
-SQL · Power BI · DAX · Excel
+SQL Server (T-SQL) · SSMS · Power BI Desktop · DAX · Power Query
 
 ## Author
 
