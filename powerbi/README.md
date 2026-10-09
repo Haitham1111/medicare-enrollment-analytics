@@ -1,5 +1,10 @@
 # Power BI Dashboard — Build Notes
 
+> **Build pack (Oct 2026):** the paint-by-numbers kit lives here —
+> `build-guide.md` (start here), `dax-measures.md`, `layout-spec.md`,
+> `screenshot-checklist.md`. The `.pbix` is built on the Windows machine and
+> never committed; `screenshots/` holds the repo gallery.
+
 ## Pages
 
 1. **Overview** — KPI cards: total MA enrollment (latest year), MA penetration %,
