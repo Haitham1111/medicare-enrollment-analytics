@@ -1,10 +1,16 @@
-# Raw data — never committed
+# Raw data - never committed
 data/raw/
 *.csv
 *.xlsx
 *.zip
 
 # Power BI: the dashboard .pbix IS committed (powerbi/medicare-star-ratings-dashboard.pbix)
+*.pbix.bak
+
+# Temp / scratch
+~*
+*.tmp
+__pycache__/
 
 # OS / editor junk
 .DS_Store
