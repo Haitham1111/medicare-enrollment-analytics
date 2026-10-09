@@ -1,0 +1,12 @@
+# Raw data — never committed
+data/raw/
+*.csv
+*.xlsx
+*.zip
+
+# Power BI working files (commit screenshots + notes, not the .pbix unless small)
+*.pbix
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
