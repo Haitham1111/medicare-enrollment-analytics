@@ -15,15 +15,3 @@ __pycache__/
 # OS / editor junk
 .DS_Store
 Thumbs.db
-# --- standard additions ---
-.env
-.env.*
-!.env.example
-*.pyc
-.venv/
-*.pbix.tmp
-.pbi/
-AutoRecovery/
-desktop.ini
-.vscode/
-.idea/
