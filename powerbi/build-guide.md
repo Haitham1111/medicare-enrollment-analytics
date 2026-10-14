@@ -183,10 +183,10 @@ General habits while building:
 
 1. **File → Save** → save as `powerbi/medicare-star-ratings-dashboard.pbix` in the repo.
    It's small (~340 KB) and committed so reviewers can open the model and DAX themselves.
-2. Follow `screenshot-checklist.md` — export the 3 pages + 2 spotlight visuals,
+2. Follow `../docs/internal/screenshot-checklist.md` — export the 3 pages + 2 spotlight visuals,
    save to `powerbi/screenshots/`, then send them my way (Drive, like the ZIPs)
    or drop them straight into the repo folder.
-3. Your `queries/drill-set-1.sql` (the 12 drills) lives in `queries/` when you
+3. Your `sql/drill-set-1.sql` (the 12 drills) lives in `sql/` when you
    send it — the dashboard doesn't block on it, but the repo README will link
    the two together.
 

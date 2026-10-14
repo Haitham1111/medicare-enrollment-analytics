@@ -106,7 +106,7 @@ COUNTROWS (
 
 > **Not used on the dashboard.** The final `At-Risk Flag` (below) has no "Dropped below 4"
 > value, so this measure returns blank. The 4-star-line question is answered in SQL instead:
-> `queries/reconciliation-242.sql` → 56 contracts. Page 3's KPI cards count contracts by
+> `sql/reconciliation-242.sql` → 56 contracts. Page 3's KPI cards count contracts by
 > flag (Steep Drop, Sub-3 Star Risk) plus `Unrated Contracts`.
 
 ---
@@ -172,7 +172,7 @@ checks top-down, first match wins. Current counts: 471 Stable / Performing,
 > test: `BLANK() - Rating2024` is negative. SQL drill C4 excludes NULLs explicitly,
 > which is how the mismatch was caught.
 
-> Cross-check: `queries/reconciliation-242.sql` — the 242 contracts at 4+ stars in 2024
+> Cross-check: `sql/reconciliation-242.sql` — the 242 contracts at 4+ stars in 2024
 > split into 173 still 4+, 56 dropped below 4, 9 not in the 2025 file, 4 unrated.
 > If Power BI and SSMS disagree, SSMS wins until you find why.
 

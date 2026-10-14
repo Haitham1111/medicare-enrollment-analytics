@@ -6,7 +6,7 @@ question against the CMS datasets and sketches the query shape
 each query is being rewritten against the actual loaded CMS tables as the
 analysis progresses.
 
-Finished, verified queries live in [`../queries/`](../queries/) and in
+Finished, verified queries live in [`../`](../) and in
 `drill-set-1.sql` (the SQL drill series run against the real data in SQL Server).
 
 Do not cite these templates as results. They are scaffolding.

@@ -1,7 +1,7 @@
 # Screenshot Checklist — dashboard exports for the repo
 
 The `.pbix` is committed at `powerbi/medicare-star-ratings-dashboard.pbix`. The screenshots in
-`powerbi/screenshots/` and SQL result screenshots in `queries/results/` let people see the work
+`powerbi/screenshots/` and SQL result screenshots in `sql/results/` let people see the work
 without opening Power BI.
 Export AFTER the cross-page checklist in `layout-spec.md` is green.
 
@@ -37,14 +37,14 @@ powerbi/
     01_rating_distribution.png
     02_yoy_movers.png
     03_at_risk_monitoring.png
-queries/
+sql/
   results/
-    A1_… through D1_….png   # one per query, see queries/README.md
+    A1_… through D1_….png   # one per query, see sql/README.md
 ```
 
 ## Done-when
 
 - [x] All 3 dashboard files exist in `powerbi/screenshots/` with the exact names above
-- [x] All 13 SQL result screenshots exist in `queries/results/`
+- [x] All 13 SQL result screenshots exist in `sql/results/`
 - [x] Numbers match SSMS (521 rated, 3.65 avg, 40.9% at 4+, Kaiser 4.29)
 - [ ] Committed + pushed — README gallery live

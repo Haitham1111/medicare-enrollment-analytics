@@ -10,7 +10,7 @@ it from scratch and the screenshots that show it.
 | `build-guide.md` | Step-by-step build, start here |
 | `dax-measures.md` | Every measure and calculated column, as they exist in the model |
 | `layout-spec.md` | Page-by-page visual spec |
-| `screenshot-checklist.md` | How and what to capture |
+| [`../docs/internal/screenshot-checklist.md`](../docs/internal/screenshot-checklist.md) | How and what to capture |
 | `medicare-theme-dark.json` | Custom report theme (the one in use) |
 | `medicare-theme-light.json` | Light variant of the same theme |
 | `screenshots/` | `01_rating_distribution.png`, `02_yoy_movers.png`, `03_at_risk_monitoring.png` |
@@ -36,7 +36,7 @@ it from scratch and the screenshots that show it.
 - Relationship: `DimContract[ContractID]` 1 → * `FactRatings[ContractID]`, single direction.
 - `_Measures` — measure table; see `dax-measures.md`.
 
-The SQL side mirrors this exactly: `queries/00_setup_views.sql` builds `FactRatings` and
+The SQL side mirrors this exactly: `sql/00_setup_views.sql` builds `FactRatings` and
 `DimContract` views over the same raw tables, so SSMS and the dashboard can be
 reconciled number for number.
 

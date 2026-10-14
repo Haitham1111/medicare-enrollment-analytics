@@ -1,34 +1,22 @@
-# Data — Download Instructions
+# Data
 
-Raw CMS files are **not committed** to this repo (large, and redistribution
-terms apply). Download them locally into `data/raw/` (git-ignored) and load
-into your SQL engine.
+Raw CMS files are **not committed** to this repo (large, and redistribution terms apply). Download them locally into `data/raw/` (git-ignored) and load them into SQL Server as described below.
 
-## Sources (all free, public use)
+## Sources used (free, public)
 
-1. **Medicare Advantage / Part D Contract and Enrollment Data**
-   CMS data portal → search "MA Part D contract enrollment data".
-   Monthly enrollment by contract, plan, state, and county.
-2. **Medicare Advantage Star Ratings**
-   CMS → "Part C and Part D Star Ratings data" — annual contract-level ratings.
-3. **Medicare Monthly Enrollment** (for Original Medicare denominators)
-   CMS → "Medicare enrollment dashboard" or monthly enrollment reports.
+**CMS Part C and Part D Star Ratings data tables**, from [CMS Part C and D Performance Data](https://www.cms.gov/medicare/health-drug-plans/part-c-d-performance-data).
 
-## Suggested local layout
+| Release | Zip | File used |
+|---|---|---|
+| 2024 Star Ratings | `2024-star-ratings-data-tables.zip` | `2024 Star Ratings Data Table - Summary Rating (Jul 2 2024).csv` |
+| 2025 Star Ratings | `2025-star-ratings-data-tables.zip` | `2025 Star Ratings Data Table - Summary Ratings (Dec 2 2024).csv` and `... - Domain Stars (Dec 2 2024).csv` |
 
-```
-data/
-└── raw/                  # git-ignored
-    ├── ma_enrollment_2020_2025.csv
-    ├── partd_enrollment.csv
-    ├── star_ratings.csv
-    └── medicare_population_by_county.csv
-```
+Contract counts: 857 contracts in the 2024 file, 789 in the 2025 file.
 
-## Loading tips
+## Load
 
-- Keep one table per file; add a `year` column if the file is monthly
-  (aggregate or filter to December / annual snapshots consistently).
-- Normalize column names to match the query files in `sql/`
-  (e.g. `contract_id`, `plan_type`, `parent_organization`, `enrollment`).
-- Index/partition on `(year, contract_id)` and `(year, state, county)`.
+Import into a database named `CMS_Stars` on SQL Server Express as `summary_2024`, `summary_2025` and `domain_2025`, then run [`../sql/00_setup_views.sql`](../sql/00_setup_views.sql) to build `FactRatings` and `DimContract`. Text values CMS publishes instead of a score (for example "Plan too new to be measured") become NULL, never zero.
+
+## Not used yet
+
+The enrollment, premium and market-concentration datasets that the starter files in [`../sql/templates/`](../sql/templates/) describe are **not** loaded in this project. Those templates are scaffolding for a next phase.

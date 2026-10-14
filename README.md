@@ -31,7 +31,7 @@ Full write-up with the query behind every number: [`docs/findings.md`](docs/find
 Source: CMS Part C and D Star Ratings summary files for 2024 and 2025, imported into the
 `CMS_Stars` database on SQL Server Express as `summary_2024`, `summary_2025` and
 `domain_2025`. Two views reshape them into a star schema, built by
-[`queries/00_setup_views.sql`](queries/00_setup_views.sql). The Power BI model uses the same
+[`sql/00_setup_views.sql`](sql/00_setup_views.sql). The Power BI model uses the same
 two tables.
 
 | Object | Type | Grain / key | Notes |
@@ -60,26 +60,26 @@ single direction. `DimContract` also carries the calculated `At-Risk Flag`; meas
 
 ## 3. Key Business Metrics & SQL Proofs
 
-Twelve drills in [`queries/drill-set-1.sql`](queries/drill-set-1.sql) plus a NULL-aware
-reconciliation in [`queries/reconciliation-242.sql`](queries/reconciliation-242.sql). Each
+Twelve drills in [`sql/drill-set-1.sql`](sql/drill-set-1.sql) plus a NULL-aware
+reconciliation in [`sql/reconciliation-242.sql`](sql/reconciliation-242.sql). Each
 was run against the real CMS data; the result screenshot shows the query, grid and row count.
 Row counts were re-checked on SQL Server Express and match.
 
 | Drill | Business metric | Technique | Rows | Result |
 |---|---|---|---|---|
-| A1 | Contracts rated in both years, YoY change | `INNER JOIN` | 756 | [screenshot](queries/results/A1_2024_vs_2025_inner_join.png) |
-| A2 | 2024 contracts missing from 2025 | anti-join (`NOT EXISTS`) | 101 | [screenshot](queries/results/A2_contract_gaps_anti_join.png) |
-| A3 | Parent-org YoY change | join + `GROUP BY` | 180 | [screenshot](queries/results/A3_parent_org_yoy_rollup.png) |
-| A4 | New 2025 contracts | anti-join (`NOT EXISTS`) | 33 | [screenshot](queries/results/A4_new_entrants_join.png) |
-| B1 | 2025 rating distribution | `GROUP BY`, `SUM() OVER ()` | 7 | [screenshot](queries/results/B1_rating_distribution_2025.png) |
-| B2 | Star bands with 20+ contracts | `HAVING` | 5 | [screenshot](queries/results/B2_star_band_distribution_having.png) |
-| B3 | Top 10 parent orgs by 2025 average | `TOP`, `GROUP BY` | 10 | [screenshot](queries/results/B3_parent_org_avg_rating_top_10.png) |
-| B4 | 2024 to 2025 band migration | self-join, `GROUP BY` | 25 | [screenshot](queries/results/B4_yoy_band_migration.png) |
-| C1 | Top contract per parent org | CTE, `ROW_NUMBER() OVER (PARTITION BY ...)` | 141 | [screenshot](queries/results/C1_cte_ranked_contracts_per_org.png) |
-| C2 | Unrated contracts by parent org | CTE, `CASE`, `NULLIF` | 108 | [screenshot](queries/results/C2_cte_unrated_by_parent_org.png) |
-| C3 | Every rating drop, categorized | CTE, `CASE` | 165 | [screenshot](queries/results/C3_cte_rating_drop_detection.png) |
-| C4 | At-risk flag for contracts rated in both years | CTEs, `CASE` | 477 | [screenshot](queries/results/C4_cte_full_at_risk_classification.png) |
-| Recon | Status of the 242 contracts at 4+ stars in 2024 | `LEFT JOIN` + explicit NULL handling | 5 | [screenshot](queries/results/D1_reconciliation_242.png) |
+| A1 | Contracts rated in both years, YoY change | `INNER JOIN` | 756 | [screenshot](sql/results/A1_2024_vs_2025_inner_join.png) |
+| A2 | 2024 contracts missing from 2025 | anti-join (`NOT EXISTS`) | 101 | [screenshot](sql/results/A2_contract_gaps_anti_join.png) |
+| A3 | Parent-org YoY change | join + `GROUP BY` | 180 | [screenshot](sql/results/A3_parent_org_yoy_rollup.png) |
+| A4 | New 2025 contracts | anti-join (`NOT EXISTS`) | 33 | [screenshot](sql/results/A4_new_entrants_join.png) |
+| B1 | 2025 rating distribution | `GROUP BY`, `SUM() OVER ()` | 7 | [screenshot](sql/results/B1_rating_distribution_2025.png) |
+| B2 | Star bands with 20+ contracts | `HAVING` | 5 | [screenshot](sql/results/B2_star_band_distribution_having.png) |
+| B3 | Top 10 parent orgs by 2025 average | `TOP`, `GROUP BY` | 10 | [screenshot](sql/results/B3_parent_org_avg_rating_top_10.png) |
+| B4 | 2024 to 2025 band migration | self-join, `GROUP BY` | 25 | [screenshot](sql/results/B4_yoy_band_migration.png) |
+| C1 | Top contract per parent org | CTE, `ROW_NUMBER() OVER (PARTITION BY ...)` | 141 | [screenshot](sql/results/C1_cte_ranked_contracts_per_org.png) |
+| C2 | Unrated contracts by parent org | CTE, `CASE`, `NULLIF` | 108 | [screenshot](sql/results/C2_cte_unrated_by_parent_org.png) |
+| C3 | Every rating drop, categorized | CTE, `CASE` | 165 | [screenshot](sql/results/C3_cte_rating_drop_detection.png) |
+| C4 | At-risk flag for contracts rated in both years | CTEs, `CASE` | 477 | [screenshot](sql/results/C4_cte_full_at_risk_classification.png) |
+| Recon | Status of the 242 contracts at 4+ stars in 2024 | `LEFT JOIN` + explicit NULL handling | 5 | [screenshot](sql/results/D1_reconciliation_242.png) |
 
 Reconciliation result (statuses total 242):
 
@@ -92,10 +92,10 @@ Reconciliation result (statuses total 242):
 
 Preview:
 
-![Reconciliation of the 242 contracts](queries/results/D1_reconciliation_242.png)
+![Reconciliation of the 242 contracts](sql/results/D1_reconciliation_242.png)
 
 Each number in the executive summary is traced to its query in
-[`docs/findings.md`](docs/findings.md). Index of result files: [`queries/README.md`](queries/README.md).
+[`docs/findings.md`](docs/findings.md). Index of result files: [`sql/README.md`](sql/README.md).
 
 ## 4. High-Resolution Dashboard Screenshots
 
@@ -128,9 +128,9 @@ Three pages, dark theme, star-rating color rules (green >= 4.5 to red < 3.0).
 1. Download the 2024 and 2025 Part C and D Star Ratings data from CMS and import the
    summary and domain sheets into a database named `CMS_Stars` as `summary_2024`,
    `summary_2025`, `domain_2025`.
-2. Run [`queries/00_setup_views.sql`](queries/00_setup_views.sql) once to build the views.
-3. Run [`queries/drill-set-1.sql`](queries/drill-set-1.sql) and
-   [`queries/reconciliation-242.sql`](queries/reconciliation-242.sql). Command line:
+2. Run [`sql/00_setup_views.sql`](sql/00_setup_views.sql) once to build the views.
+3. Run [`sql/drill-set-1.sql`](sql/drill-set-1.sql) and
+   [`sql/reconciliation-242.sql`](sql/reconciliation-242.sql). Command line:
    `sqlcmd -S .\SQLEXPRESS -C -d CMS_Stars -i queries\drill-set-1.sql`
 
 **Data location:** raw CMS files are not committed. Download them into `data/raw/`
@@ -139,11 +139,10 @@ Three pages, dark theme, star-rating color rules (green >= 4.5 to red < 3.0).
 **Repo layout**
 
 ```
-├── queries/    00_setup_views.sql, drill-set-1.sql, reconciliation-242.sql, results/
+├── sql/        00_setup_views.sql, drill-set-1.sql, reconciliation-242.sql, results/, templates/ (unrun starters)
 ├── powerbi/    .pbix, theme JSON, DAX measures, layout spec, screenshots/
-├── docs/       findings.md (write-up), build-plan.md, phase1-pull-pack.md
-├── data/       README.md (where to download the CMS files)
-└── sql/templates/   next phase: enrollment-trend query templates
+├── docs/       findings.md (write-up), internal/ (working notes)
+└── data/       README.md (where to download the CMS files)
 ```
 
 ## Limitations & Notes

@@ -1,4 +1,4 @@
-# queries/
+# sql/
 
 All files run top-to-bottom on the `CMS_Stars` database (`.\SQLEXPRESS`).
 Run them in this order:

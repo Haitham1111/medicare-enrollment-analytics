@@ -2,8 +2,8 @@
 
 Source: CMS Part C and D Star Ratings summary files, 2024 (857 contracts) and
 2025 (789 contracts), loaded into SQL Server as `CMS_Stars`. Every number below
-comes from a query in `queries/` — the drill ID is in brackets, and its result
-screenshot is in `queries/results/`.
+comes from a query in `sql/` — the drill ID is in brackets, and its result
+screenshot is in `sql/results/`.
 
 ## Headline findings
 
